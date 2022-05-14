@@ -11,7 +11,8 @@ exports.typeDefs = (0, apollo_server_express_1.gql) `
     postCreate(post: PostInput!): PostPayload
     postUpdate(postId: ID!, post: PostInput!): PostPayload
     postDelete(postId: ID!): PostPayload
-    signUp(user: UserInput!): UserPayload
+    signup(user: UserInput!): UserPayload
+    signin(user: SigninCredentials!): LoginPayload
   }
 
   type Post {
@@ -53,6 +54,11 @@ exports.typeDefs = (0, apollo_server_express_1.gql) `
     token: String
   }
 
+  type LoginPayload {
+    userErrors: [UserError]
+    token: String
+  }
+
   input PostInput {
     title: String
     content: String
@@ -63,5 +69,10 @@ exports.typeDefs = (0, apollo_server_express_1.gql) `
     email: String!
     password: String!
     bio: String!
+  }
+
+  input SigninCredentials {
+    email: String!
+    password: String!
   }
 `;

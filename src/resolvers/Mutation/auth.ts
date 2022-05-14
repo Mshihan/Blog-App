@@ -16,26 +16,28 @@ interface UserInputType {
   };
 }
 
-interface UserPayload {
+interface LoginInputType {
+  user: { email: string; password: string };
+}
+
+interface AuthPayload {
   userErrors: {
     message: string;
   }[];
-  user: User | null;
   token: string | null;
 }
 
 export const auth = {
-  signUp: async (
+  signup: async (
     _: any,
     { user }: UserInputType,
     { prisma }: Context
-  ): Promise<UserPayload> => {
+  ): Promise<AuthPayload> => {
     const isEmail = validator.isEmail(user.email);
 
     if (!isEmail)
       return {
         userErrors: [{ message: "Please enter a valid email address" }],
-        user: null,
         token: null,
       };
 
@@ -44,14 +46,12 @@ export const auth = {
     if (!isValidPassword)
       return {
         userErrors: [{ message: "Password must be at least 5 characters" }],
-        user: null,
         token: null,
       };
 
     if (!user.name || !user.bio)
       return {
         userErrors: [{ message: "Name and Bio are required" }],
-        user: null,
         token: null,
       };
 
@@ -62,6 +62,13 @@ export const auth = {
         name: user.name,
         email: user.email,
         password: hashedPassword,
+      },
+    });
+
+    const profile = await prisma.profile.create({
+      data: {
+        bio: user.bio,
+        userId: newUser.id,
       },
     });
 
@@ -76,7 +83,44 @@ export const auth = {
     return {
       userErrors: [],
       token,
-      user: null,
+    };
+  },
+  signin: async (
+    _: any,
+    { user }: LoginInputType,
+    { prisma }: Context
+  ): Promise<AuthPayload> => {
+    const { email, password } = user;
+
+    const resultUser = await prisma.user.findUnique({
+      where: {
+        email,
+      },
+    });
+
+    if (!resultUser)
+      return {
+        userErrors: [
+          { message: "Please check your credentials and try again" },
+        ],
+        token: null,
+      };
+
+    const isPasswordMatch = await bcrypt.compare(password, resultUser.password);
+
+    if (!isPasswordMatch)
+      return {
+        userErrors: [
+          { message: "Please check your credentials and try again" },
+        ],
+        token: null,
+      };
+
+    return {
+      userErrors: [],
+      token: JWT.sign({ userId: resultUser.id }, JWT_SECRET, {
+        expiresIn: "1h",
+      }),
     };
   },
 };
