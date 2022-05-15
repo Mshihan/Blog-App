@@ -4,6 +4,7 @@ export const typeDefs = gql`
   type Query {
     posts: [Post!]!
     me: User
+    profile(userId: String): Profile
   }
 
   type Mutation {
@@ -29,7 +30,6 @@ export const typeDefs = gql`
     id: ID!
     name: String!
     email: String!
-    profile: Profile
     password: String
     posts: [Post]
   }

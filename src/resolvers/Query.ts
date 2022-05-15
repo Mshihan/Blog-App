@@ -12,4 +12,11 @@ export const Query = {
       orderBy: { createdAt: "desc" },
     });
   },
+
+  profile: (_: any, { userId }: { userId: string }, { prisma }: Context) => {
+    if (!userId) return null;
+    return prisma.profile.findUnique({
+      where: { userId: Number(userId) },
+    });
+  },
 };

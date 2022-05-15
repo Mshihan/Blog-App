@@ -4,8 +4,7 @@ import express from "express";
 import http from "http";
 import { DocumentNode } from "graphql";
 import { typeDefs } from "./schema";
-import { Query, Mutation } from "./resolvers";
-
+import { Query, Mutation, Profile } from "./resolvers";
 import { Prisma, PrismaClient } from "@prisma/client";
 import { getUserFromToken } from "./resolvers/utils/getUserFromToken";
 
@@ -49,5 +48,6 @@ async function startApolloServer(typeDefs: DocumentNode, resolvers: any) {
 const resolver = {
   Query,
   Mutation,
+  Profile,
 };
 startApolloServer(typeDefs, resolver);

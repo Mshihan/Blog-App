@@ -6,6 +6,7 @@ exports.typeDefs = (0, apollo_server_express_1.gql) `
   type Query {
     posts: [Post!]!
     me: User
+    profile(userId: String): Profile
   }
 
   type Mutation {
@@ -31,7 +32,6 @@ exports.typeDefs = (0, apollo_server_express_1.gql) `
     id: ID!
     name: String!
     email: String!
-    profile: Profile
     password: String
     posts: [Post]
   }

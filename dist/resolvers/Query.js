@@ -14,4 +14,11 @@ exports.Query = {
             orderBy: { createdAt: "desc" },
         });
     },
+    profile: (_, { userId }, { prisma }) => {
+        if (!userId)
+            return null;
+        return prisma.profile.findUnique({
+            where: { userId: Number(userId) },
+        });
+    },
 };

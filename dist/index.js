@@ -32,5 +32,6 @@ async function startApolloServer(typeDefs, resolvers) {
 const resolver = {
     Query: resolvers_1.Query,
     Mutation: resolvers_1.Mutation,
+    Profile: resolvers_1.Profile,
 };
 startApolloServer(schema_1.typeDefs, resolver);
