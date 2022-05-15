@@ -7,6 +7,7 @@ import { typeDefs } from "./schema";
 import { Query, Mutation } from "./resolvers";
 
 import { Prisma, PrismaClient } from "@prisma/client";
+import { getUserFromToken } from "./resolvers/utils/getUserFromToken";
 
 export interface Context {
   prisma: PrismaClient<
@@ -14,6 +15,7 @@ export interface Context {
     never,
     Prisma.RejectOnNotFound | Prisma.RejectPerOperation | undefined
   >;
+  userInfo: { userId: number };
 }
 
 async function startApolloServer(typeDefs: DocumentNode, resolvers: any) {
@@ -27,8 +29,9 @@ async function startApolloServer(typeDefs: DocumentNode, resolvers: any) {
     typeDefs,
     resolvers,
     plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
-    context: {
-      prisma,
+    context: async ({ req }: any) => {
+      const userInfo = await getUserFromToken(req.headers.authorization);
+      return { prisma, userInfo };
     },
   });
 

@@ -10,6 +10,7 @@ const http_1 = __importDefault(require("http"));
 const schema_1 = require("./schema");
 const resolvers_1 = require("./resolvers");
 const client_1 = require("@prisma/client");
+const getUserFromToken_1 = require("./resolvers/utils/getUserFromToken");
 async function startApolloServer(typeDefs, resolvers) {
     const prisma = new client_1.PrismaClient();
     const app = (0, express_1.default)();
@@ -18,8 +19,9 @@ async function startApolloServer(typeDefs, resolvers) {
         typeDefs,
         resolvers,
         plugins: [(0, apollo_server_core_1.ApolloServerPluginDrainHttpServer)({ httpServer })],
-        context: {
-            prisma,
+        context: async ({ req }) => {
+            const userInfo = await (0, getUserFromToken_1.getUserFromToken)(req.headers.authorization);
+            return { prisma, userInfo };
         },
     });
     await server.start();

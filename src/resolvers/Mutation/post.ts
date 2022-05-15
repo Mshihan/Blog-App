@@ -1,8 +1,11 @@
 import { Post, prisma, Prisma } from "@prisma/client";
+import { userInfo } from "os";
 import { Context } from "../../index";
+import { canUserMutation } from "../utils/canUserMutation";
 
 interface PostCreateArgs {
   post: {
+    id: string;
     title?: string;
     content?: string;
   };
@@ -19,8 +22,14 @@ export const post = {
   postCreate: async (
     __: any,
     { post }: PostCreateArgs,
-    { prisma }: Context
+    { prisma, userInfo }: Context
   ): Promise<PostPayloadType> => {
+    if (!userInfo)
+      return {
+        userErrors: [{ message: "Forbidden access (unauthenticated user)" }],
+        post: null,
+      };
+
     const { title, content } = post;
     if (!title || !content)
       return {
@@ -34,7 +43,7 @@ export const post = {
         data: {
           title,
           content,
-          authorId: 1,
+          authorId: userInfo.userId,
         },
       }),
     };
@@ -42,9 +51,17 @@ export const post = {
   postUpdate: async (
     _: any,
     { post, postId }: { postId: string; post: PostCreateArgs["post"] },
-    { prisma }: Context
+    { prisma, userInfo }: Context
   ): Promise<PostPayloadType> => {
     const { title, content } = post;
+
+    const error = await canUserMutation({
+      userId: userInfo.userId,
+      postId: post.id,
+      prisma,
+    });
+
+    if (error) return error;
 
     let payloadToUpdate = {
       title,
@@ -81,8 +98,23 @@ export const post = {
   postDelete: async (
     _: any,
     { postId }: { postId: string },
-    { prisma }: Context
+    { prisma, userInfo }: Context
   ) => {
+    if (!userInfo?.userId) {
+      return {
+        userErrors: [{ message: "Forbidden access (unauthenticated user)" }],
+        post: null,
+      };
+    }
+
+    const error = await canUserMutation({
+      userId: userInfo.userId,
+      postId: postId,
+      prisma,
+    });
+
+    if (error) return error;
+
     const existingPost = await prisma.post.findUnique({
       where: { id: Number(postId) },
     });
@@ -96,6 +128,86 @@ export const post = {
     return {
       userErrors: [],
       post: prisma.post.delete({ where: { id: Number(postId) } }),
+    };
+  },
+
+  postPublish: async (
+    _: any,
+    { postId }: { postId: string },
+    { prisma, userInfo }: Context
+  ) => {
+    if (!userInfo?.userId) {
+      return {
+        userErrors: [{ message: "Forbidden access (unauthenticated user)" }],
+        post: null,
+      };
+    }
+
+    const error = await canUserMutation({
+      userId: userInfo.userId,
+      postId: postId,
+      prisma,
+    });
+
+    if (error) return error;
+
+    const existingPost = await prisma.post.findUnique({
+      where: { id: Number(postId) },
+    });
+
+    if (!existingPost) {
+      return {
+        userErrors: [{ message: "Post dose not exists" }],
+        post: null,
+      };
+    }
+
+    return {
+      userErrors: [],
+      post: prisma.post.update({
+        data: { published: true },
+        where: { id: Number(postId) },
+      }),
+    };
+  },
+
+  postUnpublish: async (
+    _: any,
+    { postId }: { postId: string },
+    { prisma, userInfo }: Context
+  ) => {
+    if (!userInfo?.userId) {
+      return {
+        userErrors: [{ message: "Forbidden access (unauthenticated user)" }],
+        post: null,
+      };
+    }
+
+    const error = await canUserMutation({
+      userId: userInfo.userId,
+      postId: postId,
+      prisma,
+    });
+
+    if (error) return error;
+
+    const existingPost = await prisma.post.findUnique({
+      where: { id: Number(postId) },
+    });
+
+    if (!existingPost) {
+      return {
+        userErrors: [{ message: "Post dose not exists" }],
+        post: null,
+      };
+    }
+
+    return {
+      userErrors: [],
+      post: prisma.post.update({
+        data: { published: false },
+        where: { id: Number(postId) },
+      }),
     };
   },
 };
