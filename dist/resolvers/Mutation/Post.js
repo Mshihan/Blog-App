@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.post = void 0;
-const canUserMutation_1 = require("../utils/canUserMutation");
+const canUserMutation_1 = require("../Utils/canUserMutation");
 exports.post = {
     postCreate: async (__, { post }, { prisma, userInfo }) => {
         if (!userInfo)

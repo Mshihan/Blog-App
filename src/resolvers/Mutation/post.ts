@@ -1,7 +1,7 @@
 import { Post, prisma, Prisma } from "@prisma/client";
 import { userInfo } from "os";
 import { Context } from "../../index";
-import { canUserMutation } from "../utils/canUserMutation";
+import { canUserMutation } from "../Utils/canUserMutation";
 
 interface PostCreateArgs {
   post: {
@@ -130,7 +130,6 @@ export const post = {
       post: prisma.post.delete({ where: { id: Number(postId) } }),
     };
   },
-
   postPublish: async (
     _: any,
     { postId }: { postId: string },
@@ -170,7 +169,6 @@ export const post = {
       }),
     };
   },
-
   postUnpublish: async (
     _: any,
     { postId }: { postId: string },
