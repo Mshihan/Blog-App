@@ -11,6 +11,7 @@ exports.Query = {
     },
     posts: (_, __, { prisma }) => {
         return prisma.post.findMany({
+            where: { published: true },
             orderBy: { createdAt: "desc" },
         });
     },
