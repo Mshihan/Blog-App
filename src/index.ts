@@ -29,6 +29,7 @@ async function startApolloServer(typeDefs: DocumentNode, resolvers: any) {
     plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
     context: async ({ req }: any) => {
       const userInfo = await getUserFromToken(req.headers.authorization);
+      console.log(req.headers);
       return { prisma, userInfo };
     },
   });

@@ -14,11 +14,19 @@ exports.Query = {
             orderBy: { createdAt: "desc" },
         });
     },
-    profile: (_, { userId }, { prisma }) => {
+    profile: async (_, { userId }, { prisma, userInfo }) => {
+        const isMyProfile = (userInfo === null || userInfo === void 0 ? void 0 : userInfo.userId) === Number(userId);
         if (!userId)
             return null;
-        return prisma.profile.findUnique({
+        const profile = await prisma.profile.findUnique({
             where: { userId: Number(userId) },
         });
+        if (!profile)
+            return null;
+        console.log(isMyProfile);
+        return {
+            ...profile,
+            isMyProfile,
+        };
     },
 };

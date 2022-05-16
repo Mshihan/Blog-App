@@ -39,6 +39,7 @@ exports.typeDefs = (0, apollo_server_express_1.gql) `
   type Profile {
     id: ID!
     bio: String!
+    isMyProfile: Boolean!
     user: User!
   }
 
